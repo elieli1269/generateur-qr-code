@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Générateur QR Code</title>
+  <meta name="description" content="Créez et personnalisez des codes QR : liens, mots-clés, logo, cadres. Export PNG et SVG." />
+  <meta name="theme-color" content="#f3efe6" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <div class="header-inner">
+      <div>
+        <h1>Générateur QR Code</h1>
+        <div class="mark" aria-hidden="true"></div>
+        <p class="tagline">Liens · mots-clés · logo · cadres</p>
+      </div>
+      <div class="row">
+        <button type="button" class="btn" id="btn-new">Nouveau</button>
+        <button type="button" class="btn accent" id="btn-png">PNG</button>
+        <button type="button" class="btn" id="btn-svg">SVG</button>
+        <button type="button" class="btn" id="btn-print">Imprimer</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="panel controls">
+      <div class="tabs" role="tablist" aria-label="Type de contenu">
+        <button type="button" class="tab active" data-kind="url">Lien</button>
+        <button type="button" class="tab" data-kind="keywords">Mots-clés</button>
+        <button type="button" class="tab" data-kind="text">Texte</button>
+        <button type="button" class="tab" data-kind="wifi">Wi‑Fi</button>
+        <button type="button" class="tab" data-kind="email">E-mail</button>
+        <button type="button" class="tab" data-kind="phone">Tél.</button>
+        <button type="button" class="tab" data-kind="sms">SMS</button>
+        <button type="button" class="tab" data-kind="vcard">Contact</button>
+      </div>
+
+      <div class="field">
+        <label for="name">Nom du code</label>
+        <input id="name" type="text" placeholder="Carte du menu" autocomplete="off" />
+        <span class="hint">Affiché sur les cadres étiquette / ticket / enseigne.</span>
+      </div>
+
+      <div data-kind-panel="url">
+        <div class="field">
+          <label for="url">URL</label>
+          <input id="url" type="url" placeholder="https://exemple.fr/menu" autocomplete="off" />
+          <span class="hint">Sans http, https:// est ajouté automatiquement.</span>
+        </div>
+      </div>
+
+      <div data-kind-panel="keywords" class="hidden">
+        <div class="field">
+          <label>Mots-clés</label>
+          <div id="keyword-chips" class="chips"></div>
+          <input id="keyword-input" type="text" placeholder="Entrée ou virgule pour ajouter" />
+        </div>
+      </div>
+
+      <div data-kind-panel="text" class="hidden">
+        <div class="field">
+          <label for="text">Texte libre</label>
+          <textarea id="text" placeholder="Votre message…"></textarea>
+        </div>
+      </div>
+
+      <div data-kind-panel="wifi" class="hidden">
+        <div class="field">
+          <label for="ssid">Réseau (SSID)</label>
+          <input id="ssid" type="text" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="wifi-sec">Sécurité</label>
+          <select id="wifi-sec">
+            <option value="WPA">WPA / WPA2</option>
+            <option value="WEP">WEP</option>
+            <option value="nopass">Ouvert</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="wifipass">Mot de passe</label>
+          <input id="wifipass" type="password" autocomplete="off" />
+        </div>
+      </div>
+
+      <div data-kind-panel="email" class="hidden">
+        <div class="field">
+          <label for="email-to">Destinataire</label>
+          <input id="email-to" type="email" placeholder="bonjour@exemple.fr" />
+        </div>
+      </div>
+
+      <div data-kind-panel="phone" class="hidden">
+        <div class="field">
+          <label for="phone">Numéro</label>
+          <input id="phone" type="tel" placeholder="06 12 34 56 78" />
+        </div>
+      </div>
+
+      <div data-kind-panel="sms" class="hidden">
+        <div class="field">
+          <label for="sms-to">Numéro</label>
+          <input id="sms-to" type="tel" />
+        </div>
+        <div class="field">
+          <label for="sms-body">Message</label>
+          <textarea id="sms-body"></textarea>
+        </div>
+      </div>
+
+      <div data-kind-panel="vcard" class="hidden">
+        <div class="field"><label for="v-first">Prénom</label><input id="v-first" type="text" /></div>
+        <div class="field"><label for="v-last">Nom</label><input id="v-last" type="text" /></div>
+        <div class="field"><label for="v-org">Organisation</label><input id="v-org" type="text" /></div>
+        <div class="field"><label for="v-phone">Téléphone</label><input id="v-phone" type="tel" /></div>
+        <div class="field"><label for="v-email">E-mail</label><input id="v-email" type="email" /></div>
+        <div class="field"><label for="v-url">Site</label><input id="v-url" type="url" /></div>
+      </div>
+
+      <hr style="border:0;border-top:1px solid var(--line);margin:1rem 0" />
+
+      <p style="font-size:0.85rem;font-weight:700;margin:0 0 0.5rem">Style</p>
+      <div class="colors">
+        <div class="color-row"><span>Modules</span><input id="fg" type="color" value="#1c1915" /></div>
+        <div class="color-row"><span>Fond</span><input id="bg" type="color" value="#fffdf8" /></div>
+        <div class="color-row"><span>Yeux</span><input id="eye" type="color" value="#9a341c" /></div>
+      </div>
+
+      <div class="field" style="margin-top:0.9rem">
+        <label>Forme des modules</label>
+        <div class="row">
+          <button type="button" class="chip" data-dot="square">Carrés</button>
+          <button type="button" class="chip active" data-dot="rounded">Arrondis</button>
+          <button type="button" class="chip" data-dot="extra-rounded">Souples</button>
+          <button type="button" class="chip" data-dot="dots">Points</button>
+          <button type="button" class="chip" data-dot="classy">Classique</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="margin">Marge intérieure <span id="margin-val">12 px</span></label>
+        <input id="margin" type="range" min="0" max="48" value="12" />
+      </div>
+
+      <div class="field">
+        <label>Logo au centre</label>
+        <div class="row">
+          <label class="btn" style="display:inline-flex;align-items:center">
+            Importer
+            <input id="logo-file" type="file" accept="image/*" class="hidden" />
+          </label>
+          <button type="button" class="btn" id="logo-clear">Retirer</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Cadre extérieur</label>
+        <div class="row">
+          <button type="button" class="chip" data-frame="nu">Nu</button>
+          <button type="button" class="chip" data-frame="filet">Filet</button>
+          <button type="button" class="chip active" data-frame="etiquette">Étiquette</button>
+          <button type="button" class="chip" data-frame="ticket">Ticket</button>
+          <button type="button" class="chip" data-frame="tampon">Tampon</button>
+          <button type="button" class="chip" data-frame="enseigne">Enseigne</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="preview-col">
+      <div id="preview-frame" class="preview-card frame-etiquette">
+        <p id="frame-title" style="text-align:center;font-family:Georgia,serif;font-style:italic;margin:0 0 0.5rem;font-size:1.1rem">Carte du menu</p>
+        <div id="qr-host" aria-label="Aperçu du code QR"></div>
+        <p id="frame-sub" style="text-align:center;color:var(--muted);font-size:0.85rem;margin:0.5rem 0 0">menu · terrasse</p>
+        <div class="payload">
+          <strong>CONTENU ENCODÉ</strong>
+          <span id="payload-text">…</span>
+        </div>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </section>
+  </main>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

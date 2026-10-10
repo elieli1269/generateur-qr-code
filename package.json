@@ -1,0 +1,47 @@
+{
+  "name": "generateur-qr-code",
+  "productName": "Générateur QR Code",
+  "version": "1.0.0",
+  "description": "Générateur de codes QR personnalisables — liens, mots-clés, logo, cadres.",
+  "author": "elieli1269",
+  "license": "MIT",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win portable nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "app.generateurqr.code",
+    "productName": "Générateur QR Code",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "index.html",
+      "app.js",
+      "styles.css",
+      "electron/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "portable",
+        "nsis"
+      ],
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "shortcutName": "Générateur QR Code",
+      "artifactName": "Generateur-QR-Code-Setup-${version}.${ext}"
+    },
+    "portable": {
+      "artifactName": "Generateur-QR-Code-${version}-portable.exe"
+    }
+  }
+}

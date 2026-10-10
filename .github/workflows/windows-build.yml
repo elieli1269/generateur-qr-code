@@ -1,0 +1,93 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      package_windows:
+        description: Produire l'exécutable Windows
+        type: boolean
+        default: true
+      package_store:
+        description: Produire le MSIX Microsoft Store (secrets requis)
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  windows-exe:
+    name: Exécutable Windows
+    if: ${{ github.event_name == 'push' || inputs.package_windows }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Empaqueter exe et installeur
+        run: npm run build:win
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: generateur-qr-windows
+          if-no-files-found: error
+          path: |
+            release/*.exe
+
+  microsoft-store:
+    name: Paquet MSIX
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.package_store }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Générer le zip Store via PWABuilder
+        env:
+          PWA_URL: ${{ vars.PWA_URL }}
+          PACKAGE_ID: ${{ secrets.STORE_PACKAGE_ID }}
+          PUBLISHER: ${{ secrets.STORE_PUBLISHER }}
+          PUBLISHER_NAME: ${{ secrets.STORE_PUBLISHER_DISPLAY_NAME }}
+        run: |
+          set -eu
+          test -n "$PWA_URL" || { echo "Variable PWA_URL manquante."; exit 1; }
+          test -n "$PACKAGE_ID" || { echo "Secret STORE_PACKAGE_ID manquant."; exit 1; }
+          test -n "$PUBLISHER" || { echo "Secret STORE_PUBLISHER manquant."; exit 1; }
+          test -n "$PUBLISHER_NAME" || { echo "Secret STORE_PUBLISHER_DISPLAY_NAME manquant."; exit 1; }
+          mkdir -p store-out
+          python3 - <<'PY'
+          import json, os, urllib.request
+          body = {
+            "url": os.environ["PWA_URL"],
+            "name": "Générateur QR Code",
+            "packageId": os.environ["PACKAGE_ID"],
+            "publisher": {
+              "displayName": os.environ["PUBLISHER_NAME"],
+              "commonName": os.environ["PUBLISHER"],
+            },
+            "version": "1.0.0.0",
+            "allowSigning": True,
+            "resourceLanguage": "fr-FR",
+            "classicPackage": {"generate": True, "version": "1.0.0.0"},
+          }
+          req = urllib.request.Request(
+            "https://pwabuilder-windows-docker.azurewebsites.net/msix/generatezip",
+            data=json.dumps(body).encode(),
+            headers={"Content-Type": "application/json"},
+          )
+          with urllib.request.urlopen(req, timeout=240) as res, open("store-out/generateur-qr-store.zip", "wb") as out:
+            out.write(res.read())
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: generateur-qr-msix
+          path: store-out/generateur-qr-store.zip
