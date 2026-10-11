@@ -1,4 +1,4 @@
-/* Générateur QR Code v1.1 */
+/* QR Folio v1.2 */
 (function () {
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => [...el.querySelectorAll(sel)];
@@ -6,17 +6,17 @@
   const STORAGE_LIB = "gqr-library-v1";
 
   const PRESETS = [
-    { id: "encre", label: "Encre", fg: "#1a1714", bg: "#fffcf7", eye: "#1a1714" },
-    { id: "vermillon", label: "Vermillon", fg: "#1a1714", bg: "#fffcf7", eye: "#b4532a" },
-    { id: "nuit", label: "Nuit", fg: "#e8e4dc", bg: "#15131a", eye: "#c9a227" },
-    { id: "ocean", label: "Océan", fg: "#0c4a6e", bg: "#f0f9ff", eye: "#0369a1" },
-    { id: "foret", label: "Forêt", fg: "#14532d", bg: "#f0fdf4", eye: "#15803d" },
+    { id: "classic", label: "Classic", fg: "#12151c", bg: "#ffffff", eye: "#12151c" },
+    { id: "ink", label: "Ink", fg: "#12151c", bg: "#ffffff", eye: "#1b4f8a" },
+    { id: "night", label: "Night", fg: "#e8ecf2", bg: "#12151c", eye: "#7eb6ff" },
+    { id: "ocean", label: "Ocean", fg: "#0c4a6e", bg: "#f0f9ff", eye: "#0369a1" },
+    { id: "forest", label: "Forest", fg: "#14532d", bg: "#f0fdf4", eye: "#15803d" },
     { id: "rose", label: "Rose", fg: "#9f1239", bg: "#fff1f2", eye: "#be123c" },
   ];
 
   const defaultState = () => ({
     kind: "url",
-    name: "Carte du menu",
+    name: "Menu card",
     url: "https://exemple.fr/menu",
     text: "",
     keywords: ["menu", "terrasse"],
@@ -26,20 +26,23 @@
     email: { to: "", subject: "", body: "" },
     phone: "",
     sms: { to: "", body: "" },
+    whatsapp: { phone: "", message: "" },
+    geo: { place: "" },
+    event: { title: "", location: "", start: "", end: "", notes: "" },
     vcard: { first: "", last: "", org: "", phone: "", email: "", url: "" },
     style: {
-      fg: "#1a1714",
-      bg: "#fffcf7",
-      eye: "#b4532a",
-      dot: "rounded",
-      corner: "extra-rounded",
-      cornerDot: "dot",
-      margin: 12,
+      fg: "#12151c",
+      bg: "#ffffff",
+      eye: "#12151c",
+      dot: "square",
+      corner: "square",
+      cornerDot: "square",
+      margin: 16,
       logo: null,
       logoSize: 0.28,
-      ecl: "Q",
+      ecl: "M",
     },
-    frame: "etiquette",
+    frame: "nu",
     exportSize: 1024,
   });
 
@@ -70,7 +73,7 @@
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "") || "generateur-qr";
+      .replace(/^-|-$/g, "") || "qr-folio";
   }
 
   function normalizeUrl(raw) {
@@ -81,7 +84,7 @@
   }
 
   function wifiEscape(s) {
-    return String(s).replace(/([\\;,:"])/g, "\\$1");
+    return String(s).replace(/([\\;,:\"])/g, "\\$1");
   }
 
   function payload() {
@@ -115,6 +118,34 @@
         const body = state.sms.body.trim();
         return `sms:${state.sms.to.trim().replace(/\s+/g, "")}${body ? "?body=" + encodeURIComponent(body) : ""}`;
       }
+      case "whatsapp": {
+        const phone = (state.whatsapp.phone || "").replace(/\D/g, "");
+        if (!phone) return "";
+        const msg = (state.whatsapp.message || "").trim();
+        return `https://wa.me/${phone}${msg ? "?text=" + encodeURIComponent(msg) : ""}`;
+      }
+      case "geo": {
+        const place = (state.geo.place || "").trim();
+        if (!place) return "";
+        return "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(place);
+      }
+      case "event": {
+        const e = state.event;
+        if (!(e.title || "").trim()) return "";
+        const fmt = (v) => {
+          if (!v) return "";
+          const d = new Date(v);
+          if (Number.isNaN(d.getTime())) return "";
+          return d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+        };
+        const lines = ["BEGIN:VEVENT", `SUMMARY:${e.title.trim()}`];
+        if (e.location) lines.push(`LOCATION:${e.location}`);
+        if (e.start) lines.push(`DTSTART:${fmt(e.start)}`);
+        if (e.end) lines.push(`DTEND:${fmt(e.end)}`);
+        if (e.notes) lines.push(`DESCRIPTION:${e.notes}`);
+        lines.push("END:VEVENT");
+        return "BEGIN:VCALENDAR\nVERSION:2.0\n" + lines.join("\n") + "\nEND:VCALENDAR";
+      }
       case "vcard": {
         const c = state.vcard;
         if (!c.first && !c.last && !c.org && !c.phone && !c.email) return "";
@@ -141,7 +172,18 @@
       const raw = localStorage.getItem(STORAGE_DRAFT);
       if (!raw) return;
       const parsed = JSON.parse(raw);
-      state = { ...defaultState(), ...parsed, style: { ...defaultState().style, ...(parsed.style || {}) } };
+      state = {
+        ...defaultState(),
+        ...parsed,
+        style: { ...defaultState().style, ...(parsed.style || {}) },
+        wifi: { ...defaultState().wifi, ...(parsed.wifi || {}) },
+        email: { ...defaultState().email, ...(parsed.email || {}) },
+        sms: { ...defaultState().sms, ...(parsed.sms || {}) },
+        whatsapp: { ...defaultState().whatsapp, ...(parsed.whatsapp || {}) },
+        geo: { ...defaultState().geo, ...(parsed.geo || {}) },
+        event: { ...defaultState().event, ...(parsed.event || {}) },
+        vcard: { ...defaultState().vcard, ...(parsed.vcard || {}) },
+      };
     } catch (_) {}
   }
 
@@ -313,7 +355,7 @@
   async function updateQr() {
     const token = ++updateToken;
     const data = payload();
-    $("#payload-text").textContent = data || "Ajoutez un contenu (URL, texte, mots-clés…)."
+    $("#payload-text").textContent = data || "Ajoutez un contenu (URL, texte, mots-clés…).";
     try {
       const instance = await ensureQr();
       if (token !== updateToken) return;
@@ -370,7 +412,7 @@
     const blob = new Blob([JSON.stringify(library, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "collection-qr.json";
+    a.download = "qr-folio-library.json";
     a.click();
     URL.revokeObjectURL(a.href);
     setStatus("Collection exportée.", true);
@@ -448,6 +490,14 @@
     $("#v-phone").value = state.vcard.phone || "";
     $("#v-email").value = state.vcard.email || "";
     $("#v-url").value = state.vcard.url || "";
+    if ($("#wa-phone")) $("#wa-phone").value = state.whatsapp?.phone || "";
+    if ($("#wa-msg")) $("#wa-msg").value = state.whatsapp?.message || "";
+    if ($("#geo-place")) $("#geo-place").value = state.geo?.place || "";
+    if ($("#ev-title")) $("#ev-title").value = state.event?.title || "";
+    if ($("#ev-loc")) $("#ev-loc").value = state.event?.location || "";
+    if ($("#ev-start")) $("#ev-start").value = state.event?.start || "";
+    if ($("#ev-end")) $("#ev-end").value = state.event?.end || "";
+    if ($("#ev-notes")) $("#ev-notes").value = state.event?.notes || "";
     renderKeywords();
     showKindPanels();
     $$("[data-kind]").forEach((b) => b.classList.toggle("active", b.getAttribute("data-kind") === state.kind));
@@ -496,14 +546,14 @@
     mapInput("fg", (el) => { state.style.fg = el.value; });
     mapInput("bg", (el) => { state.style.bg = el.value; });
     mapInput("eye", (el) => { state.style.eye = el.value; });
-    mapInput("margin", (el) => { state.style.margin = Number(el.value); $("#margin-val").textContent = state.style.margin + " px"; });
+    mapInput("margin", (el) => { state.style.margin = Number(el.value); $("#margin-val").textContent = el.value + " px"; });
     mapInput("logo-size", (el) => { state.style.logoSize = Number(el.value) / 100; $("#logo-size-val").textContent = el.value + " %"; });
     mapInput("ecl", (el) => { state.style.ecl = el.value; });
     mapInput("export-size", (el) => { state.exportSize = Number(el.value); });
     mapInput("ssid", (el) => { state.wifi.ssid = el.value; });
     mapInput("wifipass", (el) => { state.wifi.password = el.value; });
     mapInput("wifi-sec", (el) => { state.wifi.security = el.value; });
-    $("#wifi-hidden")?.addEventListener("change", (e) => { state.wifi.hidden = e.target.checked; scheduleUpdate(); });
+    mapInput("wifi-hidden", (el) => { state.wifi.hidden = el.checked; });
     mapInput("email-to", (el) => { state.email.to = el.value; });
     mapInput("email-subject", (el) => { state.email.subject = el.value; });
     mapInput("email-body", (el) => { state.email.body = el.value; });
@@ -516,48 +566,85 @@
     mapInput("v-phone", (el) => { state.vcard.phone = el.value; });
     mapInput("v-email", (el) => { state.vcard.email = el.value; });
     mapInput("v-url", (el) => { state.vcard.url = el.value; });
+    mapInput("wa-phone", (el) => { state.whatsapp = state.whatsapp || { phone: "", message: "" }; state.whatsapp.phone = el.value; });
+    mapInput("wa-msg", (el) => { state.whatsapp = state.whatsapp || { phone: "", message: "" }; state.whatsapp.message = el.value; });
+    mapInput("geo-place", (el) => { state.geo = state.geo || { place: "" }; state.geo.place = el.value; });
+    mapInput("ev-title", (el) => { state.event = state.event || { title: "", location: "", start: "", end: "", notes: "" }; state.event.title = el.value; });
+    mapInput("ev-loc", (el) => { state.event = state.event || { title: "", location: "", start: "", end: "", notes: "" }; state.event.location = el.value; });
+    mapInput("ev-start", (el) => { state.event = state.event || { title: "", location: "", start: "", end: "", notes: "" }; state.event.start = el.value; });
+    mapInput("ev-end", (el) => { state.event = state.event || { title: "", location: "", start: "", end: "", notes: "" }; state.event.end = el.value; });
+    mapInput("ev-notes", (el) => { state.event = state.event || { title: "", location: "", start: "", end: "", notes: "" }; state.event.notes = el.value; });
 
-    $("#keyword-input")?.addEventListener("keydown", (e) => {
+    $("#btn-classic")?.addEventListener("click", () => {
+      const d = defaultState();
+      state.style = { ...d.style };
+      state.frame = "nu";
+      $("#fg").value = d.style.fg;
+      $("#bg").value = d.style.bg;
+      $("#eye").value = d.style.eye;
+      $("#margin").value = d.style.margin;
+      $("#margin-val").textContent = d.style.margin + " px";
+      $("#ecl").value = d.style.ecl;
+      $$("[data-dot]").forEach((b) => b.classList.toggle("active", b.getAttribute("data-dot") === "square"));
+      $$("[data-corner]").forEach((b) => b.classList.toggle("active", b.getAttribute("data-corner") === "square"));
+      $$("[data-frame]").forEach((b) => b.classList.toggle("active", b.getAttribute("data-frame") === "nu"));
+      scheduleUpdate();
+      applyFrameClass();
+      setStatus("QR classique appliqué.", true);
+    });
+
+    const keywordInput = $("#keyword-input");
+    keywordInput?.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
-        const v = e.target.value.trim().replace(/,$/, "");
+        const v = keywordInput.value.replace(/,/g, "").trim();
         if (v && !state.keywords.includes(v)) {
-          state.keywords.push(v.slice(0, 48));
+          state.keywords.push(v);
+          keywordInput.value = "";
           renderKeywords();
           scheduleUpdate();
         }
-        e.target.value = "";
+      } else if (e.key === "Backspace" && !keywordInput.value && state.keywords.length) {
+        state.keywords.pop();
+        renderKeywords();
+        scheduleUpdate();
       }
     });
 
     $("#logo-file")?.addEventListener("change", (e) => {
-      const file = e.target.files?.[0];
+      const f = e.target.files?.[0];
       e.target.value = "";
-      if (!file) return;
+      if (!f) return;
       const reader = new FileReader();
-      reader.onload = () => { state.style.logo = reader.result; scheduleUpdate(); setStatus("Logo ajouté.", true); };
-      reader.readAsDataURL(file);
+      reader.onload = () => {
+        state.style.logo = reader.result;
+        scheduleUpdate();
+        setStatus("Logo ajouté.", true);
+      };
+      reader.readAsDataURL(f);
     });
-    $("#logo-clear")?.addEventListener("click", () => { state.style.logo = null; scheduleUpdate(); setStatus("Logo retiré."); });
-
-    const wire = (ids, fn) => ids.forEach((id) => $("#" + id)?.addEventListener("click", () => fn().catch((err) => setStatus(err.message || String(err)))));
-    wire(["btn-png", "btn-png-2"], downloadPng);
-    wire(["btn-svg", "btn-svg-2"], downloadSvg);
-    wire(["btn-copy", "btn-copy-2"], copyPng);
-    ["btn-print", "btn-print-2"].forEach((id) => $("#" + id)?.addEventListener("click", () => window.print()));
+    $("#logo-clear")?.addEventListener("click", () => {
+      state.style.logo = null;
+      scheduleUpdate();
+      setStatus("Logo retiré.");
+    });
 
     $("#btn-new")?.addEventListener("click", () => {
       state = defaultState();
-      state.name = "";
-      state.url = "";
-      state.keywords = [];
-      state.style.logo = null;
       syncFormFromState();
       scheduleUpdate();
-      setStatus("Nouveau code.");
+      setStatus("Nouveau code.", true);
     });
-
     $("#btn-save")?.addEventListener("click", () => { saveDraft(); addToLibrary(); });
+    const bindExport = (id, fn) => $("#" + id)?.addEventListener("click", () => fn().catch((e) => setStatus(e.message)));
+    bindExport("btn-png", downloadPng);
+    bindExport("btn-svg", downloadSvg);
+    bindExport("btn-copy", copyPng);
+    bindExport("btn-png-2", downloadPng);
+    bindExport("btn-svg-2", downloadSvg);
+    bindExport("btn-copy-2", copyPng);
+    $("#btn-print")?.addEventListener("click", () => window.print());
+    $("#btn-print-2")?.addEventListener("click", () => window.print());
     $("#btn-save-lib")?.addEventListener("click", addToLibrary);
     $("#btn-export-lib")?.addEventListener("click", exportLibraryJson);
     $("#import-lib")?.addEventListener("change", (e) => {
