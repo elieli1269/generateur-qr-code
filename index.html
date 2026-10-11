@@ -3,18 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Générateur QR Code</title>
-  <meta name="description" content="Créez et personnalisez des codes QR : liens, mots-clés, logo, cadres, bibliothèque, planche." />
-  <meta name="theme-color" content="#f0ebe3" />
+  <title>QR Folio</title>
+  <meta name="description" content="QR Folio — classic QR first, then logo, colors, and frame. PNG/SVG export, library, sheet." />
+  <meta name="theme-color" content="#e7e9ee" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <header>
     <div class="header-inner">
       <div>
-        <h1>Générateur QR Code</h1>
-        <div class="mark" aria-hidden="true"></div>
-        <p class="tagline">Studio · logo · cadres · bibliothèque · planche</p>
+        <h1>QR Folio</h1>
+        <p class="tagline">QR classique d'abord. Logo, couleurs et cadre ensuite.</p>
       </div>
       <div class="header-actions">
         <button type="button" class="btn" id="btn-new">Nouveau</button>
@@ -37,7 +36,6 @@
         <button type="button" class="section-tab" data-section="planche">Planche</button>
       </div>
 
-      <!-- CONTENU -->
       <div class="section-panel" data-panel="contenu">
         <div class="kind-tabs" role="tablist" aria-label="Type de contenu">
           <button type="button" class="tab active" data-kind="url">Lien</button>
@@ -47,12 +45,15 @@
           <button type="button" class="tab" data-kind="email">E-mail</button>
           <button type="button" class="tab" data-kind="phone">Tél.</button>
           <button type="button" class="tab" data-kind="sms">SMS</button>
+          <button type="button" class="tab" data-kind="whatsapp">WhatsApp</button>
+          <button type="button" class="tab" data-kind="geo">Lieu</button>
+          <button type="button" class="tab" data-kind="event">Agenda</button>
           <button type="button" class="tab" data-kind="vcard">Contact</button>
         </div>
 
         <div class="field">
           <label for="name">Nom du code</label>
-          <input id="name" type="text" placeholder="Carte du menu" autocomplete="off" />
+          <input id="name" type="text" placeholder="Menu card" autocomplete="off" />
           <span class="hint">Affiché sur les cadres étiquette, ticket et enseigne.</span>
         </div>
 
@@ -137,6 +138,51 @@
           </div>
         </div>
 
+        <div data-kind-panel="whatsapp" class="hidden">
+          <div class="field">
+            <label for="wa-phone">Numéro WhatsApp</label>
+            <input id="wa-phone" type="tel" placeholder="33612345678" />
+            <span class="hint">Indicatif pays, sans le +.</span>
+          </div>
+          <div class="field">
+            <label for="wa-msg">Message</label>
+            <textarea id="wa-msg"></textarea>
+          </div>
+        </div>
+
+        <div data-kind-panel="geo" class="hidden">
+          <div class="field">
+            <label for="geo-place">Lieu</label>
+            <input id="geo-place" type="text" placeholder="12 rue de Rivoli, Paris" />
+            <span class="hint">Ouvre Google Maps au scan.</span>
+          </div>
+        </div>
+
+        <div data-kind-panel="event" class="hidden">
+          <div class="field">
+            <label for="ev-title">Titre</label>
+            <input id="ev-title" type="text" placeholder="Vernissage" />
+          </div>
+          <div class="field">
+            <label for="ev-loc">Lieu</label>
+            <input id="ev-loc" type="text" />
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="ev-start">Début</label>
+              <input id="ev-start" type="datetime-local" />
+            </div>
+            <div class="field">
+              <label for="ev-end">Fin</label>
+              <input id="ev-end" type="datetime-local" />
+            </div>
+          </div>
+          <div class="field">
+            <label for="ev-notes">Notes</label>
+            <textarea id="ev-notes"></textarea>
+          </div>
+        </div>
+
         <div data-kind-panel="vcard" class="hidden">
           <div class="field-row">
             <div class="field"><label for="v-first">Prénom</label><input id="v-first" type="text" /></div>
@@ -151,24 +197,29 @@
         </div>
       </div>
 
-      <!-- STYLE -->
       <div class="section-panel hidden" data-panel="style">
+        <div class="field">
+          <label>Point de départ</label>
+          <button type="button" class="btn primary" id="btn-classic">QR classique — noir, carré, sans logo</button>
+          <span class="hint">Remet le style et le cadre à nu, comme une vraie appli QR de base.</span>
+        </div>
+
         <div class="field">
           <label>Presets</label>
           <div class="preset-row" id="presets"></div>
         </div>
 
         <div class="colors">
-          <div class="color-row"><span>Modules</span><input id="fg" type="color" value="#1a1714" /></div>
-          <div class="color-row"><span>Fond</span><input id="bg" type="color" value="#fffcf7" /></div>
-          <div class="color-row"><span>Yeux</span><input id="eye" type="color" value="#b4532a" /></div>
+          <div class="color-row"><span>Modules</span><input id="fg" type="color" value="#12151c" /></div>
+          <div class="color-row"><span>Fond</span><input id="bg" type="color" value="#ffffff" /></div>
+          <div class="color-row"><span>Yeux</span><input id="eye" type="color" value="#12151c" /></div>
         </div>
 
         <div class="field" style="margin-top:0.9rem">
           <label>Forme des modules</label>
           <div class="chip-row">
-            <button type="button" class="chip" data-dot="square">Carrés</button>
-            <button type="button" class="chip active" data-dot="rounded">Arrondis</button>
+            <button type="button" class="chip active" data-dot="square">Carrés</button>
+            <button type="button" class="chip" data-dot="rounded">Arrondis</button>
             <button type="button" class="chip" data-dot="extra-rounded">Souples</button>
             <button type="button" class="chip" data-dot="dots">Points</button>
             <button type="button" class="chip" data-dot="classy">Classique</button>
@@ -179,15 +230,15 @@
         <div class="field">
           <label>Coins (yeux)</label>
           <div class="chip-row">
-            <button type="button" class="chip" data-corner="square">Carré</button>
-            <button type="button" class="chip active" data-corner="extra-rounded">Arrondi</button>
+            <button type="button" class="chip active" data-corner="square">Carré</button>
+            <button type="button" class="chip" data-corner="extra-rounded">Arrondi</button>
             <button type="button" class="chip" data-corner="dot">Point</button>
           </div>
         </div>
 
         <div class="field">
-          <label for="margin">Marge intérieure <span id="margin-val">12 px</span></label>
-          <input id="margin" type="range" min="0" max="48" value="12" />
+          <label for="margin">Marge intérieure <span id="margin-val">16 px</span></label>
+          <input id="margin" type="range" min="0" max="48" value="16" />
         </div>
 
         <div class="field">
@@ -199,8 +250,8 @@
           <label for="ecl">Correction d'erreur</label>
           <select id="ecl">
             <option value="L">L — faible (~7 %)</option>
-            <option value="M">M — moyenne (~15 %)</option>
-            <option value="Q" selected>Q — élevée (~25 %)</option>
+            <option value="M" selected>M — moyenne (~15 %)</option>
+            <option value="Q">Q — élevée (~25 %)</option>
             <option value="H">H — max (~30 %, recommandé avec logo)</option>
           </select>
         </div>
@@ -227,19 +278,18 @@
         </div>
       </div>
 
-      <!-- CADRE -->
       <div class="section-panel hidden" data-panel="cadre">
         <div class="field">
           <label>Cadre extérieur</label>
           <div class="chip-row">
-            <button type="button" class="chip" data-frame="nu">Nu</button>
+            <button type="button" class="chip active" data-frame="nu">Nu</button>
             <button type="button" class="chip" data-frame="filet">Filet</button>
-            <button type="button" class="chip active" data-frame="etiquette">Étiquette</button>
+            <button type="button" class="chip" data-frame="etiquette">Étiquette</button>
             <button type="button" class="chip" data-frame="ticket">Ticket</button>
             <button type="button" class="chip" data-frame="tampon">Tampon</button>
             <button type="button" class="chip" data-frame="enseigne">Enseigne</button>
           </div>
-          <span class="hint">Le cadre s'affiche dans l'aperçu et à l'impression. L'export PNG/SVG exporte le QR seul (avec logo).</span>
+          <span class="hint">Le cadre s'affiche dans l'aperçu et à l'impression. L'export PNG/SVG exporte le QR (avec logo).</span>
         </div>
         <div class="field">
           <label for="frame-note">Sous-titre cadre (optionnel)</label>
@@ -247,7 +297,6 @@
         </div>
       </div>
 
-      <!-- COLLECTION -->
       <div class="section-panel hidden" data-panel="collection">
         <p class="hint" style="margin-top:0">Sauvegarde locale dans ce navigateur / cette appli.</p>
         <div class="chip-row" style="margin-bottom:0.85rem">
@@ -262,12 +311,11 @@
         <p id="library-empty" class="empty">Aucun code enregistré pour l'instant.</p>
       </div>
 
-      <!-- PLANCHE -->
       <div class="section-panel hidden" data-panel="planche">
         <div class="field">
           <label for="planche-text">Une URL ou un texte par ligne</label>
           <textarea id="planche-text" placeholder="https://site1.fr&#10;https://site2.fr&#10;WiFi terrasse"></textarea>
-          <span class="hint">Génère une grille de QR avec le style actuel. Utile pour menus, badges, étiquettes.</span>
+          <span class="hint">Génère une grille de QR avec le style actuel.</span>
         </div>
         <button type="button" class="btn primary" id="btn-planche">Générer la planche</button>
         <div id="planche-grid" class="planche-grid"></div>
@@ -275,10 +323,10 @@
     </section>
 
     <section class="preview-col">
-      <div id="preview-frame" class="preview-card frame-etiquette">
-        <p id="frame-title" class="frame-title">Carte du menu</p>
+      <div id="preview-frame" class="preview-card frame-nu">
+        <p id="frame-title" class="frame-title hidden">Menu card</p>
         <div id="qr-host" aria-label="Aperçu du code QR"></div>
-        <p id="frame-sub" class="frame-sub">menu · terrasse</p>
+        <p id="frame-sub" class="frame-sub hidden"></p>
         <div class="payload">
           <strong>CONTENU ENCODÉ</strong>
           <span id="payload-text">…</span>
