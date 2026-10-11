@@ -1,8 +1,8 @@
 {
   "name": "generateur-qr-code",
   "productName": "Generateur QR Code",
-  "version": "1.0.0",
-  "description": "Generateur de codes QR personnalisables — liens, mots-cles, logo, cadres.",
+  "version": "1.1.0",
+  "description": "Generateur de codes QR personnalisables — liens, mots-cles, logo, cadres, bibliotheque, planche.",
   "author": "elieli1269",
   "license": "MIT",
   "main": "electron/main.cjs",
@@ -17,35 +17,20 @@
   "build": {
     "appId": "app.generateurqr.code",
     "productName": "Generateur QR Code",
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "index.html",
-      "app.js",
-      "styles.css",
-      "electron/**/*",
-      "package.json"
-    ],
+    "directories": { "output": "release" },
+    "files": ["index.html", "app.js", "styles.css", "electron/**/*", "package.json"],
     "asar": true,
     "forceCodeSigning": false,
     "win": {
       "target": [
-        {
-          "target": "portable",
-          "arch": ["x64"]
-        },
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "nsis", "arch": ["x64"] }
       ],
       "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "allowToChangeInstallationDirectory": false,
       "shortcutName": "Generateur QR Code",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
