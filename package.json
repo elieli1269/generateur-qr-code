@@ -1,8 +1,8 @@
 {
-  "name": "generateur-qr-code",
-  "productName": "Generateur QR Code",
-  "version": "1.1.0",
-  "description": "Generateur de codes QR personnalisables — liens, mots-cles, logo, cadres, bibliotheque, planche.",
+  "name": "qr-folio",
+  "productName": "QR Folio",
+  "version": "1.2.0",
+  "description": "QR Folio — classic QR first, then logo, colors, and frame. Windows exe via GitHub Actions.",
   "author": "elieli1269",
   "license": "MIT",
   "main": "electron/main.cjs",
@@ -15,8 +15,8 @@
     "electron-builder": "26.0.12"
   },
   "build": {
-    "appId": "app.generateurqr.code",
-    "productName": "Generateur QR Code",
+    "appId": "app.qrfolio.code",
+    "productName": "QR Folio",
     "directories": { "output": "release" },
     "files": ["index.html", "app.js", "styles.css", "electron/**/*", "package.json"],
     "asar": true,
@@ -31,13 +31,13 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "shortcutName": "Generateur QR Code",
+      "shortcutName": "QR Folio",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "artifactName": "Generateur-QR-Code-Setup-${version}.${ext}"
+      "artifactName": "QR-Folio-Setup-${version}.${ext}"
     },
     "portable": {
-      "artifactName": "Generateur-QR-Code-${version}-portable.exe"
+      "artifactName": "QR-Folio-${version}-portable.exe"
     }
   }
 }

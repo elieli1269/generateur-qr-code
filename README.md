@@ -1,51 +1,51 @@
-# Générateur QR Code
+# QR Folio
 
-Application complète pour créer et personnaliser des codes QR : liens, mots-clés, Wi‑Fi, e-mail, téléphone, SMS, contact (vCard).
+Desktop and browser QR studio. Starts from a **classic black-and-white QR**, then you add logo, colors, and outer frames.
 
-- Couleurs, formes des modules, coins, logo au centre
-- Cadres extérieurs (nu, filet, étiquette, ticket, tampon, enseigne)
-- Export PNG / SVG, collection locale, planche multi-codes
-- Interface en français
+## Features
 
-## Utilisation (web)
+- Content: URL, keywords, free text, Wi‑Fi, email, phone, SMS, WhatsApp, place (Maps), calendar event, vCard
+- Style: classic reset, presets, colors, module shapes, corners, logo, error correction
+- Frames: plain, border, label, ticket, stamp, sign
+- Export PNG / SVG, local library, multi-code sheet (planche)
+- UI in French; product name **QR Folio** (English)
 
-Ouvrez `index.html` dans un navigateur moderne, ou servez le dossier :
+## Web
+
+Open `index.html` in a modern browser, or:
 
 ```bash
 npx serve .
 ```
 
-## Exécutable Windows
+## Windows executable
 
-Le workflow GitHub Actions produit un `.exe` portable et un installeur NSIS.
+GitHub Actions builds a portable `.exe` and an NSIS installer on every push to `main`.
 
-1. Onglet **Actions** de ce dépôt
+1. Open the **Actions** tab
 2. Workflow **Build Windows**
-3. **Run workflow**
-4. Téléchargez l’artefact `generateur-qr-windows`
+3. Download artifact **`qr-folio-windows`**
 
-### En local
+### Local build
 
 ```bash
 npm install
 npm run build:win
 ```
 
-Les binaires sortent dans `release/`.
+Binaries land in `release/` (`QR-Folio-*-portable.exe`, `QR-Folio-Setup-*`).
 
-## Microsoft Store (optionnel)
+## Microsoft Store (optional)
 
-Pour un paquet MSIX via PWABuilder, définissez dans le dépôt :
+Set repository variables/secrets, then run the workflow with **package_store**:
 
-| Type | Nom | Rôle |
-|------|-----|------|
-| Variable | `PWA_URL` | URL publique de l’app déployée |
+| Type | Name | Role |
+|------|------|------|
+| Variable | `PWA_URL` | Public URL of the deployed app |
 | Secret | `STORE_PACKAGE_ID` | Package ID (Partner Center) |
 | Secret | `STORE_PUBLISHER` | CN=… Publisher ID |
-| Secret | `STORE_PUBLISHER_DISPLAY_NAME` | Nom éditeur |
+| Secret | `STORE_PUBLISHER_DISPLAY_NAME` | Publisher display name |
 
-Puis lancez le workflow avec l’option **package_store**.
-
-## Licence
+## License
 
 MIT

@@ -7,9 +7,9 @@ function createWindow() {
     height: 860,
     minWidth: 780,
     minHeight: 640,
-    title: "Générateur QR Code",
+    title: "QR Folio",
     autoHideMenuBar: true,
-    backgroundColor: "#f3efe6",
+    backgroundColor: "#e7e9ee",
   });
 
   win.webContents.setWindowOpenHandler(({ url }) => {
