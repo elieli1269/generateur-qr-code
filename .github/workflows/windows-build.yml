@@ -4,15 +4,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      package_windows:
-        description: Produce Windows executable
-        type: boolean
-        default: true
-      package_store:
-        description: Produce Microsoft Store MSIX (secrets required)
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -20,7 +11,6 @@ permissions:
 jobs:
   windows-exe:
     name: Windows executable
-    if: ${{ github.event_name == 'push' || inputs.package_windows }}
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,51 +34,29 @@ jobs:
           path: |
             release/*.exe
 
-  microsoft-store:
-    name: MSIX package
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.package_store }}
-    runs-on: ubuntu-latest
+  windows-msix:
+    name: Microsoft Store MSIX
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate Store zip via PWABuilder
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Package unsigned MSIX (Store signs on submission)
         env:
-          PWA_URL: ${{ vars.PWA_URL }}
-          PACKAGE_ID: ${{ secrets.STORE_PACKAGE_ID }}
-          PUBLISHER: ${{ secrets.STORE_PUBLISHER }}
-          PUBLISHER_NAME: ${{ secrets.STORE_PUBLISHER_DISPLAY_NAME }}
-        run: |
-          set -eu
-          test -n "$PWA_URL" || { echo "Missing PWA_URL variable."; exit 1; }
-          test -n "$PACKAGE_ID" || { echo "Missing STORE_PACKAGE_ID secret."; exit 1; }
-          test -n "$PUBLISHER" || { echo "Missing STORE_PUBLISHER secret."; exit 1; }
-          test -n "$PUBLISHER_NAME" || { echo "Missing STORE_PUBLISHER_DISPLAY_NAME secret."; exit 1; }
-          mkdir -p store-out
-          python3 - <<'PY'
-          import json, os, urllib.request
-          body = {
-            "url": os.environ["PWA_URL"],
-            "name": "QR Folio",
-            "packageId": os.environ["PACKAGE_ID"],
-            "publisher": {
-              "displayName": os.environ["PUBLISHER_NAME"],
-              "commonName": os.environ["PUBLISHER"],
-            },
-            "version": "1.2.0.0",
-            "allowSigning": True,
-            "resourceLanguage": "en-US",
-            "classicPackage": {"generate": True, "version": "1.2.0.0"},
-          }
-          req = urllib.request.Request(
-            "https://pwabuilder-windows-docker.azurewebsites.net/msix/generatezip",
-            data=json.dumps(body).encode(),
-            headers={"Content-Type": "application/json"},
-          )
-          with urllib.request.urlopen(req, timeout=240) as res, open("store-out/qr-folio-store.zip", "wb") as out:
-            out.write(res.read())
-          PY
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npm run build:msix
 
       - uses: actions/upload-artifact@v4
         with:
           name: qr-folio-msix
-          path: store-out/qr-folio-store.zip
+          if-no-files-found: error
+          path: |
+            release/*.msix
+            release/*.appx
+            release/*.msixupload

@@ -1,14 +1,15 @@
 {
   "name": "qr-folio",
   "productName": "QR Folio",
-  "version": "1.2.0",
-  "description": "QR Folio — classic QR first, then logo, colors, and frame. Windows exe via GitHub Actions.",
+  "version": "1.2.1",
+  "description": "QR Folio — classic QR first, then logo, colors, and frame. Windows exe and Store MSIX via GitHub Actions.",
   "author": "elieli1269",
   "license": "MIT",
   "main": "electron/main.cjs",
   "scripts": {
     "start": "electron .",
-    "build:win": "electron-builder --win portable nsis --x64 --publish never"
+    "build:win": "electron-builder --win portable nsis --x64 --publish never",
+    "build:msix": "electron-builder --win msix --x64 --publish never"
   },
   "devDependencies": {
     "electron": "35.2.1",
@@ -24,7 +25,8 @@
     "win": {
       "target": [
         { "target": "portable", "arch": ["x64"] },
-        { "target": "nsis", "arch": ["x64"] }
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "msix", "arch": ["x64"] }
       ],
       "signAndEditExecutable": false
     },
@@ -38,6 +40,15 @@
     },
     "portable": {
       "artifactName": "QR-Folio-${version}-portable.exe"
+    },
+    "msix": {
+      "applicationId": "QRFolio",
+      "identityName": "QRFolio.QRFolio",
+      "publisher": "CN=elieli1269",
+      "publisherDisplayName": "elieli1269",
+      "displayName": "QR Folio",
+      "languages": ["fr-FR", "en-US"],
+      "artifactName": "QR-Folio-${version}.${ext}"
     }
   }
 }
