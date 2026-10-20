@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   windows-exe:
@@ -34,29 +34,22 @@ jobs:
           path: |
             release/*.exe
 
-  windows-msix:
-    name: Microsoft Store MSIX
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
-          node-version: 22
+          tag_name: v1.2.1
+          name: QR Folio 1.2.1
+          body: |
+            Windows installer for QR Folio 1.2.1.
 
-      - name: Install dependencies
-        run: npm install
+            Store package URL:
+            https://github.com/elieli1269/generateur-qr-code/releases/download/v1.2.1/QR-Folio-Setup-1.2.1.exe
 
-      - name: Package unsigned MSIX (Store signs on submission)
+            Silent install: QR-Folio-Setup-1.2.1.exe /S
+          files: |
+            release/QR-Folio-Setup-1.2.1.exe
+            release/QR-Folio-1.2.1-portable.exe
+          fail_on_unmatched_files: true
+          make_latest: true
         env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
-        run: npm run build:msix
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: qr-folio-msix
-          if-no-files-found: error
-          path: |
-            release/*.msix
-            release/*.appx
-            release/*.msixupload
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
