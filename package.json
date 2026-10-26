@@ -1,7 +1,7 @@
 {
   "name": "qr-folio",
   "productName": "QR Folio",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "QR Folio — classic QR first, then logo, colors, and frame.",
   "author": "elieli1269",
   "license": "MIT",
@@ -42,8 +42,8 @@
     },
     "appx": {
       "applicationId": "QRFolio",
-      "identityName": "QRFolio.QRFolio",
-      "publisher": "CN=Elieli1269",
+      "identityName": "Elieli1269.QRFolio",
+      "publisher": "CN=F30B755C-8F1E-43A8-B6E4-EAB3FA748AEB",
       "publisherDisplayName": "Elieli1269",
       "displayName": "QR Folio",
       "languages": ["fr-FR", "en-US"],
