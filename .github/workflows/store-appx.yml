@@ -7,6 +7,7 @@ on:
     paths:
       - package.json
       - .github/workflows/store-appx.yml
+      - scripts/**
       - electron/**
       - index.html
       - app.js
@@ -28,6 +29,10 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Generate unique tile icons
+        shell: pwsh
+        run: ./scripts/make-appx-tiles.ps1
 
       - name: Package unsigned AppX for Store signing
         env:

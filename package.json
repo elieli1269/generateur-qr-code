@@ -1,7 +1,7 @@
 {
   "name": "qr-folio",
   "productName": "QR Folio",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "QR Folio — classic QR first, then logo, colors, and frame.",
   "author": "elieli1269",
   "license": "MIT",
@@ -18,7 +18,7 @@
   "build": {
     "appId": "app.qrfolio.code",
     "productName": "QR Folio",
-    "directories": { "output": "release" },
+    "directories": { "output": "release", "buildResources": "build" },
     "files": ["index.html", "app.js", "styles.css", "electron/**/*", "package.json"],
     "asar": true,
     "forceCodeSigning": false,
@@ -46,6 +46,7 @@
       "publisher": "CN=F30B755C-8F1E-43A8-B6E4-EAB3FA748AEB",
       "publisherDisplayName": "Elieli1269",
       "displayName": "QR Folio",
+      "backgroundColor": "#0F172A",
       "languages": ["fr-FR", "en-US"],
       "showNameOnTiles": true,
       "artifactName": "QR-Folio-${version}.${ext}"
